@@ -24,7 +24,7 @@ return [
     'max_dumps' => [
 
         'day' => 1,
-        'week' => 0,
+        'weekOfMonth' => 0,
         'month' => 0,
         'year' => 0,
 
