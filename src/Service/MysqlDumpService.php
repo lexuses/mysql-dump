@@ -46,7 +46,7 @@ class MysqlDumpService
                 $this->name . $this->extension;
 
         try{
-            $this->filesystem->delete($path);
+            unlink($path);
         } catch (\Exception $e){
             throw new \Exception("Can't delete tmp file by this path: $path");
         }
