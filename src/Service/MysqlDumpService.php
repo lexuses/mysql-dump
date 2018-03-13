@@ -39,7 +39,7 @@ class MysqlDumpService
         $this->filesystem = $filesystem;
     }
 
-    public function __destruct()
+    public function clearTmp()
     {
         $path = $this->tmpFolderPath .
                 $this->separator .
@@ -107,6 +107,8 @@ class MysqlDumpService
                 $this->makeDump($driverName);
                 $this->maxDumps($driverName);
             });
+
+        $this->clearTmp();
     }
 
     protected function scanDrivers()
