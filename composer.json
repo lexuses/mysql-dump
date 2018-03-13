@@ -1,0 +1,24 @@
+{
+    "name": "lexuses/mysql-dump",
+    "description": "Laravel package for auto dump mysql database to local storage or to cloud",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alexey Khrulev",
+            "email": "lexuses@gmail.com"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Lexuses\\MysqlDump\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Lexuses\\MysqlDump\\MysqlDumpServiceProvider"
+            ]
+        }
+    }
+}
