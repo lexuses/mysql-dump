@@ -32,7 +32,7 @@ class MysqlDumpService
     {
         $this->separator = Config::get('mysql_dump.separator');
         $this->folder = date(Config::get('mysql_dump.dir_name'));
-        $this->extension = Config::get('mysql_dump.compress') ? '.tar.gz' : '.sql';
+        $this->extension = Config::get('mysql_dump.compress') ? '.sql.gz' : '.sql';
         $this->name = date(Config::get('mysql_dump.dump_name'));
         $this->path = $this->folder . $this->separator . $this->name . $this->extension;
         $this->tmpFolderPath = storage_path('tmp');
