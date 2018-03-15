@@ -3,7 +3,9 @@
 namespace Lexuses\MysqlDump;
 
 use Illuminate\Support\ServiceProvider;
-use Lexuses\MysqlDump\Commands\MysqlDumpCommand;
+use Lexuses\MysqlDump\Commands\AutoCommand;
+use Lexuses\MysqlDump\Commands\ExportCommand;
+use Lexuses\MysqlDump\Commands\ListCommand;
 
 class MysqlDumpServiceProvider extends ServiceProvider
 {
@@ -16,7 +18,9 @@ class MysqlDumpServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                MysqlDumpCommand::class,
+                AutoCommand::class,
+                ExportCommand::class,
+                ListCommand::class,
             ]);
         }
 

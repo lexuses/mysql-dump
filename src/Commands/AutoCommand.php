@@ -5,7 +5,7 @@ namespace Lexuses\MysqlDump\Commands;
 use Illuminate\Console\Command;
 use Lexuses\MysqlDump\Service\MysqlDumpService;
 
-class MysqlDumpCommand extends Command
+class AutoCommand extends Command
 {
     /**
      * The name and signature of the console command.

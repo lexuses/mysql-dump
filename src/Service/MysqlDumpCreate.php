@@ -1,0 +1,105 @@
+<?php
+
+namespace Lexuses\MysqlDump\Service;
+
+use Illuminate\Support\Facades\Config;
+use Illuminate\Filesystem\Filesystem;
+
+class MysqlDumpCreate
+{
+    protected $tmpFolderPath;
+    protected $extension;
+    protected $name;
+    protected $separator;
+    /**
+     * @var Filesystem
+     */
+    private $filesystem;
+    protected $path;
+
+
+    public function __construct(Filesystem $filesystem)
+    {
+        $this->tmpFolderPath = Config::get('mysql_dump.tmp_path');
+        $this->separator = Config::get('mysql_dump.separator');
+        $this->extension = Config::get('mysql_dump.compress') ? '.sql.gz' : '.sql';
+        $this->name = date(Config::get('mysql_dump.dump_name')) . $this->extension;
+        $this->path = $this->tmpFolderPath .
+            $this->separator .
+            $this->name .
+            $this->extension;
+        $this->filesystem = $filesystem;
+    }
+
+    /**
+     * Get dump name
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Get dump path
+     * @return string
+     */
+    public function getPath()
+    {
+        return $this->path;
+    }
+
+    public function makeStorageWithTemp($storageName)
+    {
+        $storage = new MysqlDumpStorage($storageName);
+        $storage->setCreator($this);
+        return $storage;
+    }
+
+    public function makeTemp()
+    {
+        if(!$this->filesystem->isDirectory($this->tmpFolderPath))
+            $this->filesystem->makeDirectory($this->tmpFolderPath, 0755, true);
+
+        $this->commandDump($this->path);
+
+        return $this;
+    }
+
+    public function commandDump($path)
+    {
+        $mysqldumpPath = Config::get('mysql_dump.mysqldump');
+
+        $password = '';
+        if ($p = Config::get('database.connections.mysql.password'))
+            $password = ' -p' . $p;
+
+        $zip = Config::get('mysql_dump.compress') ? ' | gzip' : '';
+
+        $command = $mysqldumpPath .
+            ' -u ' . Config::get('database.connections.mysql.username') .
+            $password .
+            ' -t ' .
+            Config::get('database.connections.mysql.database') .
+            $zip .
+            ' > ' .
+            $path;
+
+        try{
+            exec($command);
+        } catch (\Exception $e){
+            throw new \Exception('Mysqldump command return error.');
+        }
+    }
+
+    public function clearTmp()
+    {
+        try{
+            unlink($this->path);
+        } catch (\Exception $e){
+            throw new \Exception("Can't delete tmp file by this path: $this->path");
+        }
+
+        return $this;
+    }
+}
