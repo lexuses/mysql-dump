@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 class MysqlDumpStorage
 {
     /**
-     * @var MysqlDumpCreate
+     * @var MysqlDumpApp
      */
     private $dump;
 
@@ -38,7 +38,7 @@ class MysqlDumpStorage
             $this->dumpDir;
     }
 
-    public function setCreator(MysqlDumpCreate $creator)
+    public function setCreator(MysqlDumpApp $creator)
     {
         $this->dump = $creator;
     }
@@ -104,7 +104,7 @@ class MysqlDumpStorage
             ->map(function($path) use ($disk){
                 return new MysqlDumpModel($disk, $path);
             })
-            ->sortBy(function($model){
+            ->sortByDesc(function($model){
                 return $model->getLastModified();
             });
     }

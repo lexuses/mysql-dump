@@ -3,6 +3,8 @@
 namespace Lexuses\MysqlDump\Service;
 
 use Carbon\Carbon;
+use Closure;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\File;
 
@@ -30,6 +32,11 @@ class MysqlDumpModel
         return $this->name;
     }
 
+    public function getPath()
+    {
+        return $this->path;
+    }
+
     public function getLastModified()
     {
         $this->timestamp = Storage::disk($this->disk)->lastModified($this->path);
@@ -39,6 +46,27 @@ class MysqlDumpModel
     public function getTime()
     {
         return Carbon::createFromTimestamp($this->timestamp);
+    }
+
+    public function getMeta($property = null)
+    {
+        $meta = $this->getDriver()->getMetadata($this->path);
+        if( ! $property)
+            return $meta;
+
+        return isset($meta[$property]) ? $meta[$property] : false;
+    }
+
+    public function getDriver()
+    {
+        return Storage::disk($this->disk)->getDriver();
+    }
+
+    public function isLocal()
+    {
+        $system = Config::get('filesystems.disks.' . $this->disk);
+
+        return $system['driver'] == 'local';
     }
 
     public function copy($tmpPath)
@@ -60,6 +88,37 @@ class MysqlDumpModel
                 new File($tmpPath),
                 $this->name
             );
+    }
+
+    public function download($tempFolder, $readLength = 1024 * 1024, $callbackDownload = null)
+    {
+        $separator = Config::get('mysql_dump.separator');
+
+        if($this->isLocal()) {
+            return $this->getDriver()->getAdapter()->getPathPrefix() .
+                str_replace('/', '\\', $this->path);
+        }
+
+        //If dump in cloud lets download it
+        $fs = $this->getDriver();
+        $dumpName = basename($this->path);
+        $path = $tempFolder.$separator.$dumpName;
+        @unlink($path);
+
+        $tempFile = fopen($path, 'ab');
+
+        $handle = $fs->readStream($this->getPath());
+        while (($buffer = fgets($handle, $readLength)) !== false) {
+            fwrite($tempFile, $buffer);
+            if($callbackDownload AND $callbackDownload instanceof Closure) {
+                $callbackDownload($handle);
+            }
+        }
+
+        fclose($handle);
+        fclose($tempFile);
+
+        return $path;
     }
 
     public function delete()

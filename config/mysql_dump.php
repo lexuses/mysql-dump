@@ -4,6 +4,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | mysql command
+    |--------------------------------------------------------------------------
+    |
+    | This value used to import dump to mysql.
+    | Check all features in official site: https://dev.mysql.com/doc/refman/5.7/en/mysql.html
+    |
+    */
+    'mysql_app' => 'mysql',
+
+    /*
+    |--------------------------------------------------------------------------
     | mysqldump command
     |--------------------------------------------------------------------------
     |
@@ -12,6 +23,18 @@ return [
     |
     */
     'mysqldump' => 'mysqldump --complete-insert',
+
+    /*
+    |--------------------------------------------------------------------------
+    | Unzip command
+    |--------------------------------------------------------------------------
+    |
+    | This value used to unzip gz archive. You have to provide full command
+    | If you set compress to false just skip it.
+    | You can use zcat or gunzip or whatever you like
+    |
+    */
+    'unzip_app' => 'gunzip {file} | ',
 
     /*
     |--------------------------------------------------------------------------

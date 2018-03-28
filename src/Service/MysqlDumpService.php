@@ -4,14 +4,23 @@ namespace Lexuses\MysqlDump\Service;
 
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 
 class MysqlDumpService
 {
-    private $create;
+    private $app;
 
-    public function __construct(MysqlDumpCreate $create)
+    public function __construct(MysqlDumpApp $app)
     {
-        $this->create = $create;
+        $this->app = $app;
+    }
+
+    /**
+     * @return MysqlDumpApp
+     */
+    public function getApp()
+    {
+        return $this->app;
     }
 
     /**
@@ -20,18 +29,18 @@ class MysqlDumpService
      */
     public function auto()
     {
-        $this->create->makeTemp();
+        $this->app->makeTemp();
 
         $this
             ->scanStorages()
             ->each(function($storageConfig, $storageName){
 
-                $storage = $this->create->makeStorageWithTemp($storageName);
+                $storage = $this->app->makeStorageWithTemp($storageName);
                 $storage->makeDump();
                 $storage->checkMaxDumps();
             });
 
-        $this->create->clearTmp();
+        $this->app->clearTmp();
     }
 
     /**
@@ -42,9 +51,9 @@ class MysqlDumpService
      */
     public function dumpTo(string $storageName)
     {
-        $this->create->makeTemp();
+        $this->app->makeTemp();
 
-        $storage = $this->create->makeStorageWithTemp($storageName);
+        $storage = $this->app->makeStorageWithTemp($storageName);
         $storage->makeDump();
     }
 
@@ -66,6 +75,46 @@ class MysqlDumpService
             return new Collection(Config::get('mysql_dump.storage'));
 
         return Config::get('mysql_dump.storage.' . $storage);
+    }
+
+    public function getAllTables()
+    {
+        $tables_from_db = DB::select('SHOW TABLES');
+        $tables = [];
+        foreach ($tables_from_db as $table)
+        {
+            $key = key(get_object_vars($table));
+            $tables[] = $table->{$key};
+        }
+
+        return $tables;
+    }
+
+    public function truncate()
+    {
+        $tables = $this->getAllTables();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        foreach ($tables as $table)
+        {
+            //if($table == 'migrations')
+            //    continue;
+
+            DB::table($table)->truncate();
+        }
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+    }
+
+    public function drop()
+    {
+        $tables = $this->getAllTables();
+
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        foreach ($tables as $table)
+        {
+            DB::statement('DROP TABLE IF EXISTS '.$table);
+        }
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
 }

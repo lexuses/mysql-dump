@@ -5,7 +5,7 @@ namespace Lexuses\MysqlDump\Service;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Filesystem\Filesystem;
 
-class MysqlDumpCreate
+class MysqlDumpApp
 {
     protected $tmpFolderPath;
     protected $extension;
@@ -38,6 +38,12 @@ class MysqlDumpCreate
     public function getName()
     {
         return $this->name;
+    }
+
+    public function setPath($path)
+    {
+        $this->path = $path;
+        return $this;
     }
 
     /**
@@ -89,6 +95,36 @@ class MysqlDumpCreate
             exec($command);
         } catch (\Exception $e){
             throw new \Exception('Mysqldump command return error.');
+        }
+    }
+
+    public function import($path)
+    {
+        $password = '';
+        if ($p = Config::get('database.connections.mysql.password'))
+            $password = ' -p' . $p;
+
+        $zip = '';
+        if(Config::get('mysql_dump.compress')) {
+            if(stripos(Config::get('mysql_dump.unzip_app'), '{file}') === false)
+                throw new \Exception('Wrong unzip command');
+            $zip = trim(str_replace('{file}', $path, Config::get('mysql_dump.unzip_app')) . ' ');
+        }
+
+        $after = ! Config::get('mysql_dump.compress') ? ' < ' . $path : '';
+
+        $command = $zip .
+            Config::get('mysql_dump.mysql_app') .
+            ' -u ' . Config::get('database.connections.mysql.username') .
+            $password .
+            ' ' .
+            Config::get('database.connections.mysql.database') .
+            $after;
+
+        try{
+            exec($command);
+        } catch (\Exception $e) {
+            throw new \Exception('Import command return error.');
         }
     }
 

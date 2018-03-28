@@ -46,10 +46,27 @@ protected function schedule(Schedule $schedule)
 
 Manual mode:
 ```
-php artisan mysql-dump:export --storage=s3
+php artisan mysql-dump:export
 ```
 
 List of dumps:
 ```
-php artisan mysql-dump:list --storage=local
+php artisan mysql-dump:list
+```
+
+Import dump:
+
+It will download the file if you save your dump in the cloud. 
+```
+php artisan mysql-dump:import
+```
+
+Truncate:
+```
+php artisan mysql-dump:truncate
+```
+
+Drop tables:
+```
+php artisan mysql-dump:drop
 ```

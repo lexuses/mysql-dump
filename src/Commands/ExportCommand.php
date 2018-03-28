@@ -3,6 +3,7 @@
 namespace Lexuses\MysqlDump\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Config;
 use Lexuses\MysqlDump\Service\MysqlDumpService;
 
 class ExportCommand extends Command
@@ -47,7 +48,7 @@ class ExportCommand extends Command
         $storage = $this->option('storage');
 
         if(!$storage){
-            return $this->error('You must specify storage');
+            $storage = $this->choice('Choose storage:', array_keys(Config::get('mysql_dump.storage')));
         }
 
         if(!$this->service->getStorages($storage)){
@@ -63,5 +64,7 @@ class ExportCommand extends Command
         }
 
         $this->service->dumpTo($storage);
+
+        $this->info('Done!');
     }
 }

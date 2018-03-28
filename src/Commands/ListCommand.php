@@ -5,6 +5,7 @@ namespace Lexuses\MysqlDump\Commands;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Config;
 use Lexuses\MysqlDump\Service\MysqlDumpModel;
 use Lexuses\MysqlDump\Service\MysqlDumpService;
 use Lexuses\MysqlDump\Service\MysqlDumpStorage;
@@ -51,7 +52,7 @@ class ListCommand extends Command
         $storage = $this->option('storage');
 
         if(!$storage){
-            return $this->error('You must specify storage');
+            $storage = $this->choice('Choose storage:', array_keys(Config::get('mysql_dump.storage')));
         }
 
         if(!$this->service->getStorages($storage)){

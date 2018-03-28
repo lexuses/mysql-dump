@@ -4,8 +4,11 @@ namespace Lexuses\MysqlDump;
 
 use Illuminate\Support\ServiceProvider;
 use Lexuses\MysqlDump\Commands\AutoCommand;
+use Lexuses\MysqlDump\Commands\DropCommand;
 use Lexuses\MysqlDump\Commands\ExportCommand;
+use Lexuses\MysqlDump\Commands\ImportCommand;
 use Lexuses\MysqlDump\Commands\ListCommand;
+use Lexuses\MysqlDump\Commands\TruncateCommand;
 
 class MysqlDumpServiceProvider extends ServiceProvider
 {
@@ -21,6 +24,9 @@ class MysqlDumpServiceProvider extends ServiceProvider
                 AutoCommand::class,
                 ExportCommand::class,
                 ListCommand::class,
+                ImportCommand::class,
+                TruncateCommand::class,
+                DropCommand::class,
             ]);
         }
 
